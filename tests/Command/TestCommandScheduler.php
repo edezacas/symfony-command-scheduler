@@ -7,26 +7,21 @@ namespace EDC\CommandSchedulerBundle\Tests\Command;
 use EDC\CommandSchedulerBundle\Cron\JobScheduler;
 use EDC\CommandSchedulerBundle\Entity\Job;
 
-class SchedulerTest implements JobScheduler
+class TestCommandScheduler implements JobScheduler
 {
     public function getCommands(): array
     {
-        return ['edc-test-command'];
-    }
-
-    protected function getScheduleInterval(): int
-    {
-        return 60;
+        return [TestCommand::COMMAND_NAME];
     }
 
     public function shouldSchedule(string $command, \DateTime $lastRunAt): bool
     {
-        return time() - $lastRunAt->getTimestamp() >= $this->getScheduleInterval();
+        return true;
     }
 
     public function createJob(string $command, \DateTime $lastRunAt): Job
     {
-        return new Job('edc-test-command');
+        return new Job(TestCommand::COMMAND_NAME);
     }
 
 }

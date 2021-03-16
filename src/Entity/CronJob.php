@@ -6,14 +6,15 @@ namespace EDC\CommandSchedulerBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
+
 /**
- * Class Jobs
+ * Class CronJob
  * @package EDC\CommandSchedulerBundle\Entity
  *
- * @ORM\Table(name = "edc_jobs")
+ * @ORM\Table(name = "edc_cron_jobs")
  * @ORM\Entity()
  */
-class Job
+class CronJob
 {
     /**
      * @ORM\Id
@@ -22,15 +23,16 @@ class Job
      */
     private $id;
 
-    /** @ORM\Column(type = "string") */
+    /** @ORM\Column(type = "string", length = 200, unique = true) */
     private $command;
 
-    /**
-     * Job constructor.
-     */
-    public function __construct(string $command)
+    /** @ORM\Column(type = "datetime", name = "lastRunAt") */
+    private $lastRunAt;
+
+    public function __construct($command)
     {
         $this->command = $command;
+        $this->lastRunAt = new \DateTime();
     }
 
     /**
@@ -42,18 +44,18 @@ class Job
     }
 
     /**
-     * @param mixed $id
+     * @return mixed
      */
-    public function setId($id): void
+    public function getCommand()
     {
-        $this->id = $id;
+        return $this->command;
     }
 
     /**
-     * @return string
+     * @return \DateTime
      */
-    public function getCommand(): string
+    public function getLastRunAt(): \DateTime
     {
-        return $this->command;
+        return $this->lastRunAt;
     }
 }

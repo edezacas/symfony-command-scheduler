@@ -6,7 +6,10 @@ namespace EDC\CommandSchedulerBundle\Tests\Functional;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
+use EDC\CommandSchedulerBundle\Command\ScheduleCommand;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Console\Tester\CommandTester;
 
 abstract class BaseTest extends KernelTestCase
 {
@@ -21,6 +24,19 @@ abstract class BaseTest extends KernelTestCase
     public function getEm()
     {
         return $this->em;
+    }
+
+    public function executeSchedulerTest()
+    {
+        $kernel = static::createKernel();
+        $application = new Application($kernel);
+
+        $command = $application->find(ScheduleCommand::getDefaultName());
+        $commandTester = new CommandTester($command);
+        $commandTester->execute([]);
+
+        // the output of the command in the console
+        return $commandTester->getDisplay();
     }
 
     protected function setUp(): void

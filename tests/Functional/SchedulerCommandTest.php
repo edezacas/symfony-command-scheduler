@@ -4,24 +4,30 @@
 namespace EDC\CommandSchedulerBundle\Tests\Functional;
 
 
-use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Component\Console\Tester\CommandTester;
+use EDC\CommandSchedulerBundle\Entity\CronJob;
+use EDC\CommandSchedulerBundle\Tests\Command\TestCommand;
 
 class SchedulerCommandTest extends BaseTest
 {
 
     public function testExecute()
     {
-        $kernel = static::createKernel();
-        $application = new Application($kernel);
-
-        $command = $application->find('edc-job-queue:schedule');
-        $commandTester = new CommandTester($command);
-        $commandTester->execute([]);
-
         // the output of the command in the console
-        $output = $commandTester->getDisplay();
+        $output = $this->executeSchedulerTest();
 
-        $this->assertStringContainsString('edc-test-command', $output);
+        $this->assertStringContainsString(TestCommand::COMMAND_NAME, $output);
+    }
+
+    public function testSchedule()
+    {
+        $this->executeSchedulerTest();
+
+        /** @var CronJob $commandCronJob */
+        $commandCronJob = $this->getEm()->getRepository(CronJob::class)->findOneBy(
+            ['command' => TestCommand::COMMAND_NAME]
+        );
+
+        $this->assertNotNull($commandCronJob);
+        $this->assertNotNull($commandCronJob->getLastRunAt());
     }
 }

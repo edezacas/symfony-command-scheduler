@@ -10,12 +10,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class TestCommand extends Command
 {
+    const COMMAND_NAME = 'edc-test-command';
+
     /**
      * {@inheritdoc}
      */
     protected function configure()
     {
-        $this->setName('edc-test-command')
+        $this->setName(self::COMMAND_NAME)
             ->setDescription('Simple test command');
     }
 

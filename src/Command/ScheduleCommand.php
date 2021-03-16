@@ -4,10 +4,15 @@
 namespace EDC\CommandSchedulerBundle\Command;
 
 
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ObjectManager;
 use EDC\CommandSchedulerBundle\Cron\CommandScheduler;
 use EDC\CommandSchedulerBundle\Cron\CronCommand;
 use EDC\CommandSchedulerBundle\Cron\JobScheduler;
+use EDC\CommandSchedulerBundle\Entity\CronJob;
+use EDC\CommandSchedulerBundle\Entity\Job;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -46,11 +51,79 @@ class ScheduleCommand extends Command
     {
         $jobSchedulers = $this->populateJobSchedulers();
 
-        foreach ($jobSchedulers as $jobScheduler) {
-            $output->write($jobScheduler->getCommands());
+        if (empty($jobSchedulers)) {
+            $output->writeln('No job schedulers found, exiting...');
+
+            return 0;
         }
 
+        $jobsLastRunAt = $this->populateJobsLastRunAt(
+            $this->registry->getManagerForClass(CronJob::class),
+            $jobSchedulers
+        );
+
+        $this->scheduleJobs($output, $jobSchedulers, $jobsLastRunAt);
+
         return 0;
+    }
+
+    /**
+     * @param JobScheduler[] $jobSchedulers
+     * @param \DateTime[] $jobsLastRunAt
+     */
+    private function scheduleJobs(OutputInterface $output, array $jobSchedulers, array &$jobsLastRunAt)
+    {
+        foreach ($jobSchedulers as $name => $scheduler) {
+            $lastRunAt = $jobsLastRunAt[$name];
+
+            if (!$scheduler->shouldSchedule($name, $lastRunAt)) {
+                continue;
+            }
+
+            list($success, $newLastRunAt) = $this->acquireLock($name, $lastRunAt);
+            $jobsLastRunAt[$name] = $newLastRunAt;
+
+            if ($success) {
+                $output->writeln('Scheduling command '.$name);
+                $job = $scheduler->createJob($name, $lastRunAt);
+                $em = $this->registry->getManagerForClass(Job::class);
+                $em->persist($job);
+                $em->flush();
+            }
+        }
+    }
+
+    private function acquireLock($commandName, \DateTime $lastRunAt)
+    {
+        /** @var EntityManagerInterface $em */
+        $em = $this->registry->getManagerForClass(CronJob::class);
+        $con = $em->getConnection();
+
+        $now = new \DateTime();
+        $affectedRows = $con->executeStatement(
+            "UPDATE edc_cron_jobs SET lastRunAt = :now WHERE command = :command AND lastRunAt = :lastRunAt",
+            array(
+                'now' => $now,
+                'command' => $commandName,
+                'lastRunAt' => $lastRunAt,
+            ),
+            array(
+                'now' => 'datetime',
+                'lastRunAt' => 'datetime',
+            )
+        );
+
+        if ($affectedRows > 0) {
+            return array(true, $now);
+        }
+
+        /** @var CronJob $cronJob */
+        $cronJob = $em->createQuery("SELECT j FROM ".CronJob::class." j WHERE j.command = :command")
+            ->setParameter('command', $commandName)
+            ->setHint(Query::HINT_REFRESH, true)
+            ->getSingleResult();
+
+        return array(false, $cronJob->getLastRunAt());
     }
 
     /**
@@ -78,4 +151,24 @@ class ScheduleCommand extends Command
         return $schedulers;
     }
 
+    private function populateJobsLastRunAt(ObjectManager $em, array $jobSchedulers)
+    {
+        $jobsLastRunAt = array();
+
+        foreach ($em->getRepository(CronJob::class)->findAll() as $job) {
+            /** @var CronJob $job */
+            $jobsLastRunAt[$job->getCommand()] = $job->getLastRunAt();
+        }
+
+        foreach (array_keys($jobSchedulers) as $name) {
+            if (!isset($jobsLastRunAt[$name])) {
+                $job = new CronJob($name);
+                $em->persist($job);
+                $jobsLastRunAt[$name] = $job->getLastRunAt();
+            }
+        }
+        $em->flush();
+
+        return $jobsLastRunAt;
+    }
 }
