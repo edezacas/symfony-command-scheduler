@@ -5,6 +5,10 @@ services:
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
         public: false
 
+    EDC\CommandSchedulerBundle\Tests\Command\CronCommandTest:
+        tags:
+            - { name: edc_command_scheduler.cron_command }
+
     EDC\CommandSchedulerBundle\Tests\Command\TestCommandScheduler:
         tags:
             - { name: edc_command_scheduler.scheduler }

@@ -13,17 +13,17 @@ class RunnerCommandTest extends BaseTest
 
     public function testFinishedRun()
     {
-        $this->executeSchedulerTest();
+        $testJob = new Job(TestCommand::getDefaultName());
+        $this->getEm()->persist($testJob);
+        $this->getEm()->flush();
+
+        $this->assertNull($testJob->getStackTrace());
+        $this->assertNull($testJob->getMemoryUsage());
+        $this->assertNull($testJob->getMemoryUsageReal());
 
         $output = $this->executeRunnerTest();
 
-        /** @var Job $job */
-        $job = $this->getEm()->getRepository(Job::class)->findAll();
-
-        var_dump($output);
 
         var_dump("adasdds");
-
-        $this->assertNotNull($job);
     }
 }
