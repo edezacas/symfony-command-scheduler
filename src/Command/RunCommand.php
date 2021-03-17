@@ -89,8 +89,6 @@ class RunCommand extends Command
             $this->checkRunningJobs();
         }
 
-        $this->output->write("PEPEOEOEEOEOOEO");
-
         return 0;
     }
 
@@ -188,7 +186,6 @@ class RunCommand extends Command
             $data['job']->setRuntime(time() - $data['start_time']);
 
             $newState = 0 === $data['process']->getExitCode() ? Job::STATE_FINISHED : Job::STATE_FAILED;
-            $this->output->writeln($newState);
             $this->jobManager->closeJob($data['job'], $newState);
             unset($this->runningJobs[$i]);
         }

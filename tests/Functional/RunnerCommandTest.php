@@ -22,6 +22,8 @@ class RunnerCommandTest extends BaseTest
 
         var_dump($output);
 
+        var_dump("adasdds");
+
         $this->assertNotNull($job);
     }
 }
