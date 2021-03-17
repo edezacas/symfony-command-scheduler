@@ -18,9 +18,9 @@ class RunnerCommandTest extends BaseTest
         $output = $this->executeRunnerTest();
 
         /** @var Job $job */
-        $job = $this->getEm()->getRepository(Job::class)->findOneBy(
-            ['state' => Job::STATE_FINISHED]
-        );
+        $job = $this->getEm()->getRepository(Job::class)->findAll();
+
+        var_dump($output);
 
         $this->assertNotNull($job);
     }

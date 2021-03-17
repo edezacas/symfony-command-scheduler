@@ -15,7 +15,7 @@ class SchedulerCommandTest extends BaseTest
         // the output of the command in the console
         $output = $this->executeSchedulerTest();
 
-        $this->assertStringContainsString(TestCommand::COMMAND_NAME, $output);
+        $this->assertStringContainsString(TestCommand::getDefaultName(), $output);
     }
 
     public function testSchedule()
@@ -25,7 +25,7 @@ class SchedulerCommandTest extends BaseTest
 
         /** @var CronJob $commandCronJob */
         $commandCronJob = $this->getEm()->getRepository(CronJob::class)->findOneBy(
-            ['command' => TestCommand::COMMAND_NAME]
+            ['command' => TestCommand::getDefaultName()]
         );
 
 

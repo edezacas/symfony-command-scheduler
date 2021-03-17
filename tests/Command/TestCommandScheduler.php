@@ -11,7 +11,7 @@ class TestCommandScheduler implements JobScheduler
 {
     public function getCommands(): array
     {
-        return [TestCommand::COMMAND_NAME];
+        return [TestCommand::getDefaultName()];
     }
 
     public function shouldSchedule(string $command, \DateTime $lastRunAt): bool
@@ -21,7 +21,7 @@ class TestCommandScheduler implements JobScheduler
 
     public function createJob(string $command, \DateTime $lastRunAt): Job
     {
-        return new Job(TestCommand::COMMAND_NAME);
+        return new Job(TestCommand::getDefaultName());
     }
 
 }

@@ -10,14 +10,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class TestCommand extends Command
 {
-    const COMMAND_NAME = 'edc-test-command';
+    protected static $defaultName = 'edc-test-command';
 
     /**
      * {@inheritdoc}
      */
     protected function configure()
     {
-        $this->setName(self::COMMAND_NAME)
+        $this->setName(self::getDefaultName())
             ->setDescription('Simple test command');
     }
 
@@ -33,7 +33,7 @@ class TestCommand extends Command
             ]
         );
 
-        sleep(10);
+        sleep(1);
 
         $dateTimeEnd = new \DateTime();
 
@@ -44,5 +44,7 @@ class TestCommand extends Command
                 '',
             ]
         );
+
+        return 0;
     }
 }
