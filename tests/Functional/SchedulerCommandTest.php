@@ -20,6 +20,7 @@ class SchedulerCommandTest extends BaseTest
 
     public function testSchedule()
     {
+        $lastRunAt = new \DateTime();
         $this->executeSchedulerTest();
 
         /** @var CronJob $commandCronJob */
@@ -27,7 +28,9 @@ class SchedulerCommandTest extends BaseTest
             ['command' => TestCommand::COMMAND_NAME]
         );
 
+
         $this->assertNotNull($commandCronJob);
         $this->assertNotNull($commandCronJob->getLastRunAt());
+        $this->assertEquals($lastRunAt->format('Y-m-d H:m:s'), $commandCronJob->getLastRunAt()->format('Y-m-d H:m:s'));
     }
 }
