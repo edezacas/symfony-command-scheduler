@@ -78,21 +78,29 @@ class RunCommand extends Command
 
         $this->jobManager->getJobManager()->getConnection()->getConfiguration()->setSQLLogger(null);
 
+        $this->runJobs($maxJobs, $startTime, $maxRuntime);
 
+        return 0;
+    }
+
+    private function runJobs($maxJobs, $startTime, $maxRuntime)
+    {
         while (true) {
             if ($this->finishRun || time() - $startTime > $maxRuntime) {
                 break;
             }
 
-            $this->runJobs($maxJobs);
+            $this->startJobs($maxJobs);
 
             $this->checkRunningJobs();
         }
 
-        return 0;
+        if ($this->verbose) {
+            $this->output->writeln('All jobs finished, exiting.');
+        }
     }
 
-    private function runJobs($maxJobs)
+    private function startJobs($maxJobs)
     {
         while (count($this->runningJobs) < $maxJobs) {
             $job = $this->jobManager->findPendingJob();

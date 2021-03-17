@@ -25,5 +25,7 @@ class RunnerCommandTest extends BaseTest
 
 
         var_dump("adasdds");
+
+        return;
     }
 }

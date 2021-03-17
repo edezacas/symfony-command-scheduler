@@ -12,7 +12,7 @@
     </php>
 
     <testsuites>
-        <testsuite name="Project Test Suite">
+        <testsuite name="edc/command-scheduler">
             <directory>tests</directory>
         </testsuite>
     </testsuites>

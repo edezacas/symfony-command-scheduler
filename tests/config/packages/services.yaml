@@ -7,6 +7,7 @@ services:
 
     EDC\CommandSchedulerBundle\Tests\Command\CronCommandTest:
         tags:
+            - { name: console.command }
             - { name: edc_command_scheduler.cron_command }
 
     EDC\CommandSchedulerBundle\Tests\Command\TestCommandScheduler:
