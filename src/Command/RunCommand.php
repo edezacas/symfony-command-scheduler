@@ -196,10 +196,6 @@ class RunCommand extends Command
 
             $newState = 0 === $data['process']->getExitCode() ? Job::STATE_FINISHED : Job::STATE_FAILED;
 
-            if ($newState == Job::STATE_FAILED) {
-                //var_dump($data['process']);
-            }
-
             $this->jobManager->closeJob($data['job'], $newState);
             unset($this->runningJobs[$i]);
         }
