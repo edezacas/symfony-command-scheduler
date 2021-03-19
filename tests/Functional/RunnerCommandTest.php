@@ -24,10 +24,11 @@ class RunnerCommandTest extends BaseTest
         $this->assertNull($testJob->getMemoryUsageReal());
 
         $this->executeRunnerTest();
+        $this->getEm()->clear();
 
         /** @var Job $job */
         $job = $this->getEm()->getRepository(Job::class)->findOneBy(['id' => 1]);
 
-        $this->assertEquals('finished', $job->getState());
+        $this->assertEquals(Job::STATE_FINISHED, $job->getState());
     }
 }
